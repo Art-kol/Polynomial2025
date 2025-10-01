@@ -2,10 +2,67 @@ package ru.smak.math
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import ru.smak.math.polynomial.Lagrange
+import ru.smak.math.polynomial.Newton
 import ru.smak.math.polynomial.Polynomial
 import ru.smak.math.polynomial.times
+import kotlin.math.sin
+import kotlin.math.cos
+import kotlin.math.exp
+
 
 class PolynomialTest {
+    @Test
+    fun testPerformanceComparison() {
+        /*val points = mapOf(
+            -8.0 to 250199979298361.0,
+            -7.0 to 29078814248401.0,
+            -6.0 to 2418094206391.0,
+            -5.0 to 127156575521.0,
+            -4.0 to 3435973837.0,
+            -3.0 to 32285041.0,
+            -2.0 to 43691.0,
+            -1.0 to 1.0,
+            0.0 to 1.0,
+            1.0 to 17.0,
+            2.0 to 131071.0,
+            3.0 to 64570081.0,
+            4.0 to 5726623061.0,
+            5.0 to 190734863281.0,
+            6.0 to 3385331888947.0,
+            7.0 to 38771752331201.0,
+            8.0 to 321685687669321.0
+        )*/
+        val points = generatePoints(200)
+        val nStart = System.currentTimeMillis()
+        val newton = Newton(points)
+        val nTime = System.currentTimeMillis() - nStart
+
+        val lStart = System.currentTimeMillis()
+        val lagarage = Lagrange(points)
+        val lTime = System.currentTimeMillis() - lStart
+
+        println("Ньютоном: " + nTime.toString() + "мс. Лагранжем: " + lTime.toString() + "мс.")
+
+        val n2Start = System.currentTimeMillis()
+        newton.addDot(-9.0, 1667718169966657.0)
+        val n2Time = System.currentTimeMillis() - n2Start
+        println("Ньютоном добавить точку за: " + n2Time.toString() + "мс.")
+
+        val l2Start = System.currentTimeMillis()
+        val lagrange2 = Lagrange( points + (-9.0 to 1667718169966657.0))
+        val l2Time = System.currentTimeMillis() - l2Start
+        println("Лагранжем перестроить за: " + l2Time + "мс.")
+    }
+
+    fun generatePoints(count: Int): Map<Double, Double> {
+        return (0 until count).associate { i ->
+            val x = i.toDouble() // Равномерно распределенные x
+            val y = Math.sin(x) + Math.cos(2*x)
+            x to y
+        }
+    }
+
     @Test
     fun plus() {
         assertEquals(
