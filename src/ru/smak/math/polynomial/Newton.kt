@@ -124,7 +124,91 @@ class Newton : Polynomial {
 
     private val dots = mutableMapOf<Double, Double>()
 
-    private var remember_div_diffs = mutableListOf<MutableList<Double>>()   // ..
+    constructor() : super()
+
+    constructor(p: Map<Double, Double>) : super() {
+        dots.clear()
+        p.entries.forEach { entry ->
+            dots[entry.key] = entry.value
+        }
+        reconstruct()
+    }
+
+    private fun reconstruct() {
+        if (dots.isEmpty()) {
+            coeffs = mapOf(0 to 0.0)
+        } else {
+            coeffs = construct(dots).coeffs
+        }
+    }
+
+    private fun construct(pts: Map<Double, Double>): Polynomial {
+        val d_ds = divided_diffs(pts)
+        return d_ds.indices.fold(Polynomial()) { acc, i ->
+            acc + d_ds[i] * product_of_xs(pts, i)
+        }
+    }
+
+    private fun divided_diffs(points: Map<Double, Double>): List<Double> {
+        val n = points.size
+        // Берем ключи в произвольном порядке (как они хранятся в Map)
+        val keys = points.keys.toList()
+        val values = keys.map { points[it]!! }
+
+        val diffTable = Array(n) { DoubleArray(n) { 0.0 } }
+
+        for (i in 0 until n) {
+            diffTable[i][0] = values[i]
+        }
+
+        for (j in 1 until n) {
+            for (i in 0 until n - j) {
+                diffTable[i][j] = (diffTable[i + 1][j - 1] - diffTable[i][j - 1]) /
+                        (keys[i + j] - keys[i])
+            }
+        }
+
+        return List(n) { diffTable[0][it] }
+    }
+
+    private fun product_of_xs(points: Map<Double, Double>, k: Int): Polynomial {
+        // Берем ключи в том же порядке, что и в divided_diffs
+        val keys = points.keys.toList()
+        return (0 until k).fold(Polynomial(1.0)) { acc, i ->
+            acc * Polynomial(-keys[i], 1.0)
+        }
+    }
+
+    fun addDot(x: Double, y: Double): Boolean {
+        if (dots.containsKey(x)) {
+            return false
+        } else {
+            dots[x] = y
+            reconstruct()
+            return true
+        }
+    }
+
+    fun removeDot(x: Double): Boolean {
+        if (dots.containsKey(x)) {
+            dots.remove(x)
+            reconstruct()
+            return true
+        } else {
+            return false
+        }
+    }
+
+    fun dotsCopy(): Map<Double, Double> = dots.toMap()
+}
+
+/* package ru.smak.math.polynomial
+
+import ru.smak.math.neq
+
+class Newton : Polynomial {
+
+    private val dots = mutableMapOf<Double, Double>()
 
     constructor() : super()
 
@@ -203,7 +287,7 @@ class Newton : Polynomial {
     }
 
     fun dotsCopy(): Map<Double, Double> = dots.toMap()
-}
+} */
 
 
 /* package ru.smak.math.polynomial

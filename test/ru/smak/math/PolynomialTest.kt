@@ -33,7 +33,7 @@ class PolynomialTest {
             7.0 to 38771752331201.0,
             8.0 to 321685687669321.0
         )*/
-        val points = generatePoints(200)
+        val points = generatePoints(500)
         val nStart = System.currentTimeMillis()
         val newton = Newton(points)
         val nTime = System.currentTimeMillis() - nStart
